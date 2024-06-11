@@ -92,39 +92,39 @@ def score_scatter(mvm_obj: dict, xydim: List[int], *,
              CLASSID = classid_by_var.copy()
 
 
-    mvmobj=mvm_obj.copy()
-    if ((mvmobj['type']=='lpls') or  (mvmobj['type']=='jrpls')  or  (mvmobj['type']=='tpls')) and (not(isinstance(Xnew,bool))):    
+    mvm_obj=mvm_obj.copy()
+    if ((mvm_obj['type']=='lpls') or  (mvm_obj['type']=='jrpls')  or  (mvm_obj['type']=='tpls')) and (not(isinstance(Xnew,bool))):    
         Xnew=False
         print('score scatter does not take Xnew for jrpls or lpls for now')
     
     if isinstance(Xnew,bool):
         
-        if 'obsidX' in mvmobj:
-            ObsID_=mvmobj['obsidX']
+        if 'obsidX' in mvm_obj:
+            ObsID_=mvm_obj['obsidX']
         else:
             ObsID_ = []
-            for n in list(np.arange(mvmobj['T'].shape[0])+1):
+            for n in list(np.arange(mvm_obj['T'].shape[0])+1):
                 ObsID_.append('Obs #'+str(n))  
-        T_matrix=mvmobj['T']    
+        T_matrix=mvm_obj['T']    
         
         if not(rscores):        
-            if (mvmobj['type']=='lpls'):
-                ObsID_=mvmobj['obsidR']
-            if (mvmobj['type']=='jrpls') or (mvmobj['type']=='tpls') :   
-                 ObsID_=mvmobj['obsidRi'][0]
+            if (mvm_obj['type']=='lpls'):
+                ObsID_=mvm_obj['obsidR']
+            if (mvm_obj['type']=='jrpls') or (mvm_obj['type']=='tpls') :   
+                 ObsID_=mvm_obj['obsidRi'][0]
         else:
-            if (mvmobj['type']=='lpls'):
-                ObsID_=mvmobj['obsidX']
-                T_matrix=mvmobj['Rscores']
-            if (mvmobj['type']=='jrpls') or (mvmobj['type']=='tpls')  : 
+            if (mvm_obj['type']=='lpls'):
+                ObsID_=mvm_obj['obsidX']
+                T_matrix=mvm_obj['Rscores']
+            if (mvm_obj['type']=='jrpls') or (mvm_obj['type']=='tpls')  : 
                 if isinstance(material,bool):
-                    allobsids=[y for x in mvmobj['obsidXi'] for y in x]
+                    allobsids=[y for x in mvm_obj['obsidXi'] for y in x]
                     ObsID_=allobsids
                     clssid_obs=[]
                     clssid_class=[]
-                    for i,R_ in enumerate(mvmobj['Rscores']):
-                        clssid_obs.extend(mvmobj['obsidXi'][i])
-                        clssid_class.extend([mvmobj['materials'][i]]*len( mvmobj['obsidXi'][i]))
+                    for i,R_ in enumerate(mvm_obj['Rscores']):
+                        clssid_obs.extend(mvm_obj['obsidXi'][i])
+                        clssid_class.extend([mvm_obj['materials'][i]]*len( mvm_obj['obsidXi'][i]))
                         if i==0:
                             allrscores=R_
                         else:
@@ -135,8 +135,8 @@ def score_scatter(mvm_obj: dict, xydim: List[int], *,
                     colorby='material'
                     T_matrix=allrscores
                 else:
-                    ObsID_ = mvmobj['obsidXi'][mvmobj['materials'].index(material) ]
-                    T_matrix = mvmobj['Rscores'][mvmobj['materials'].index(material) ]
+                    ObsID_ = mvm_obj['obsidXi'][mvm_obj['materials'].index(material) ]
+                    T_matrix = mvm_obj['Rscores'][mvm_obj['materials'].index(material) ]
     else:
         if isinstance(Xnew,np.ndarray):
             X_=Xnew.copy()
@@ -148,20 +148,20 @@ def score_scatter(mvm_obj: dict, xydim: List[int], *,
             ObsID_ = Xnew.values[:,0].astype(str)
             ObsID_ = ObsID_.tolist()
             
-        if 'Q' in mvmobj:  
-            xpred=phi.pls_pred(X_,mvmobj)
+        if 'Q' in mvm_obj:  
+            xpred=phi.pls_pred(X_,mvm_obj)
         else:
-            xpred=phi.pca_pred(X_,mvmobj)
+            xpred=phi.pca_pred(X_,mvm_obj)
         T_matrix=xpred['Tnew']
     
     if include_model:
-        if 'obsidX' in mvmobj:
-            ObsID__=mvmobj['obsidX'].copy()
+        if 'obsidX' in mvm_obj:
+            ObsID__=mvm_obj['obsidX'].copy()
         else:
             ObsID__ = []
-            for n in list(np.arange(mvmobj['T'].shape[0])+1):
+            for n in list(np.arange(mvm_obj['T'].shape[0])+1):
                 ObsID__.append('Model Obs #'+str(n))  
-        T_matrix_=mvmobj['T'].copy()    
+        T_matrix_=mvm_obj['T'].copy()    
       
         if isinstance(CLASSID,bool): # If there are no classids -> create create classids
             source=(['Model']*T_matrix_.shape[0])
@@ -193,11 +193,11 @@ def score_scatter(mvm_obj: dict, xydim: List[int], *,
         sc = ax.scatter(source['x'], source['y'], s=marker_size)
 
         if add_ci:
-            T_aux1=mvmobj['T'][:,[xydim[0]-1]]
-            T_aux2=mvmobj['T'][:,[xydim[1]-1]]
+            T_aux1=mvm_obj['T'][:,[xydim[0]-1]]
+            T_aux2=mvm_obj['T'][:,[xydim[1]-1]]
             T_aux = np.hstack((T_aux1,T_aux2))
             st=(T_aux.T @ T_aux)/T_aux.shape[0]
-            [xd95,xd99,yd95p,yd95n,yd99p,yd99n]=phi.scores_conf_int_calc(st,mvmobj['T'].shape[0])
+            [xd95,xd99,yd95p,yd95n,yd99p,yd99n]=phi.scores_conf_int_calc(st,mvm_obj['T'].shape[0])
             
             ax.plot(xd95, yd95p, 'gold', linestyle='dashed')
             ax.plot(xd95, yd95n, 'gold', linestyle='dashed')
@@ -297,11 +297,11 @@ def score_scatter(mvm_obj: dict, xydim: List[int], *,
 
         # Add confidence intervals if add_ci is True
         if add_ci:
-            T_aux1 = mvmobj['T'][:, [xydim[0] - 1]]
-            T_aux2 = mvmobj['T'][:, [xydim[1] - 1]]
+            T_aux1 = mvm_obj['T'][:, [xydim[0] - 1]]
+            T_aux2 = mvm_obj['T'][:, [xydim[1] - 1]]
             T_aux = np.hstack((T_aux1, T_aux2))
             st = (T_aux.T @ T_aux) / T_aux.shape[0]
-            xd95, xd99, yd95p, yd95n, yd99p, yd99n = phi.scores_conf_int_calc(st, mvmobj['T'].shape[0])
+            xd95, xd99, yd95p, yd95n, yd99p, yd99n = phi.scores_conf_int_calc(st, mvm_obj['T'].shape[0])
             
             ax.plot(xd95, yd95p, 'gold', linestyle='dashed')
             ax.plot(xd95, yd95n, 'gold', linestyle='dashed')
@@ -352,23 +352,23 @@ def loadings(mvm_obj: dict, plotwidth: int = 10, xgrid: bool = False,
         None
     """
     
-    mvmobj = mvm_obj.copy()
+    mvm_obj = mvm_obj.copy()
     space_lbl = 'X'
-    A = mvmobj['T'].shape[1]
-    num_varX = mvmobj['P'].shape[0] if 'P' in mvmobj else 0
-    is_pls = 'Q' in mvmobj
+    A = mvm_obj['T'].shape[1]
+    num_varX = mvm_obj['P'].shape[0] if 'P' in mvm_obj else 0
+    is_pls = 'Q' in mvm_obj
     
-    if mvmobj['type'] in ['lpls', 'jrpls', 'tpls']:
+    if mvm_obj['type'] in ['lpls', 'jrpls', 'tpls']:
         loading_lbl = 'S*'
-        if mvmobj['type'] == 'lpls':
-            mvmobj['Ws'] = mvmobj['Ss']
+        if mvm_obj['type'] == 'lpls':
+            mvm_obj['Ws'] = mvm_obj['Ss']
         if isinstance(material, bool) and not zspace:
-            mvmobj['Ws'] = mvmobj['Ss']
-        if mvmobj['type'] in ['jrpls', 'tpls'] and not isinstance(material, bool):
-            mvmobj['Ws'] = mvmobj['Ssi'][mvmobj['materials'].index(material)]
-            mvmobj['varidX'] = mvmobj['varidXi'][mvmobj['materials'].index(material)]
-        elif mvmobj['type'] == 'tpls' and zspace:
-            mvmobj['varidX'] = mvmobj['varidZ']
+            mvm_obj['Ws'] = mvm_obj['Ss']
+        if mvm_obj['type'] in ['jrpls', 'tpls'] and not isinstance(material, bool):
+            mvm_obj['Ws'] = mvm_obj['Ssi'][mvm_obj['materials'].index(material)]
+            mvm_obj['varidX'] = mvm_obj['varidXi'][mvm_obj['materials'].index(material)]
+        elif mvm_obj['type'] == 'tpls' and zspace:
+            mvm_obj['varidX'] = mvm_obj['varidZ']
             loading_lbl = 'Wz*'
             space_lbl = 'Z'
     else:
@@ -377,9 +377,9 @@ def loadings(mvm_obj: dict, plotwidth: int = 10, xgrid: bool = False,
     lv_prefix = 'LV #' if is_pls else 'PC #'
     lv_labels = [lv_prefix + str(a+1) for a in range(A)]
     
-    XVar = mvmobj.get('varidX', ['XVar #' + str(n+1) for n in range(num_varX)])
+    XVar = mvm_obj.get('varidX', ['XVar #' + str(n+1) for n in range(num_varX)])
     if is_pls:
-        YVar = mvmobj.get('varidY', ['YVar #' + str(n+1) for n in range(mvmobj['Q'].shape[0])])
+        YVar = mvm_obj.get('varidY', ['YVar #' + str(n+1) for n in range(mvm_obj['Q'].shape[0])])
     
     # Plot X space loadings
     fig, ax = plt.subplots(figsize=(plotwidth, 5))
@@ -387,7 +387,7 @@ def loadings(mvm_obj: dict, plotwidth: int = 10, xgrid: bool = False,
     indices = np.arange(len(XVar))
 
     for i in range(A):
-        ax.bar(indices + i * width, mvmobj['Ws'][:, i] if is_pls else mvmobj['P'][:, i], width=width, label=f"{lv_labels[i]}")
+        ax.bar(indices + i * width, mvm_obj['Ws'][:, i] if is_pls else mvm_obj['P'][:, i], width=width, label=f"{lv_labels[i]}")
     
     ax.set_title(f"{space_lbl} Space Loadings{addtitle}")
     ax.set_xlabel('Variables')
@@ -409,7 +409,7 @@ def loadings(mvm_obj: dict, plotwidth: int = 10, xgrid: bool = False,
         indices = np.arange(len(YVar))
 
         for i in range(A):
-            ax.bar(indices + i * width, mvmobj['Q'][:, i], width=width, label=f"{lv_labels[i]}")
+            ax.bar(indices + i * width, mvm_obj['Q'][:, i], width=width, label=f"{lv_labels[i]}")
         
         ax.set_title(f"Y Space Loadings{addtitle}")
         ax.set_xlabel('Variables')
@@ -447,41 +447,41 @@ def loadings_map(mvm_obj: dict, dims: List[int], *, plotwidth: int = 8, addtitle
         None
     """
 
-    mvmobj = mvm_obj.copy()
-    A = mvmobj['T'].shape[1]
-    if (mvmobj['type'] == 'lpls') or (mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls'):
-        if mvmobj['type'] == 'lpls':
-            mvmobj['Ws'] = mvmobj['Ss']
+    mvm_obj = mvm_obj.copy()
+    A = mvm_obj['T'].shape[1]
+    if (mvm_obj['type'] == 'lpls') or (mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls'):
+        if mvm_obj['type'] == 'lpls':
+            mvm_obj['Ws'] = mvm_obj['Ss']
         if isinstance(material, bool) and not zspace:
-            mvmobj['Ws'] = mvmobj['Ss']
-        if ((mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls')) and not isinstance(material, bool):
-            mvmobj['Ws'] = mvmobj['Ssi'][mvmobj['materials'].index(material)]
-            mvmobj['varidX'] = mvmobj['varidXi'][mvmobj['materials'].index(material)]
-        elif (mvmobj['type'] == 'tpls') and zspace:
-            mvmobj['varidX'] = mvmobj['varidZ']
+            mvm_obj['Ws'] = mvm_obj['Ss']
+        if ((mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls')) and not isinstance(material, bool):
+            mvm_obj['Ws'] = mvm_obj['Ssi'][mvm_obj['materials'].index(material)]
+            mvm_obj['varidX'] = mvm_obj['varidXi'][mvm_obj['materials'].index(material)]
+        elif (mvm_obj['type'] == 'tpls') and zspace:
+            mvm_obj['varidX'] = mvm_obj['varidZ']
     else:
-        num_varX = mvmobj['P'].shape[0]
+        num_varX = mvm_obj['P'].shape[0]
 
-    if 'Q' in mvmobj:
+    if 'Q' in mvm_obj:
         lv_prefix = 'LV #'
         lv_labels = [lv_prefix + str(a + 1) for a in range(A)]
 
-        if 'varidX' in mvmobj:
-            XVar = mvmobj['varidX']
+        if 'varidX' in mvm_obj:
+            XVar = mvm_obj['varidX']
         else:
             XVar = ['XVar #' + str(n + 1) for n in range(num_varX)]
 
-        num_varY = mvmobj['Q'].shape[0]
-        if 'varidY' in mvmobj:
-            YVar = mvmobj['varidY']
+        num_varY = mvm_obj['Q'].shape[0]
+        if 'varidY' in mvm_obj:
+            YVar = mvm_obj['varidY']
         else:
             YVar = ['YVar #' + str(n + 1) for n in range(num_varY)]
 
-        x_ws = mvmobj['Ws'][:, dims[0] - 1] / np.max(np.abs(mvmobj['Ws'][:, dims[0] - 1]))
-        y_ws = mvmobj['Ws'][:, dims[1] - 1] / np.max(np.abs(mvmobj['Ws'][:, dims[1] - 1]))
+        x_ws = mvm_obj['Ws'][:, dims[0] - 1] / np.max(np.abs(mvm_obj['Ws'][:, dims[0] - 1]))
+        y_ws = mvm_obj['Ws'][:, dims[1] - 1] / np.max(np.abs(mvm_obj['Ws'][:, dims[1] - 1]))
 
-        x_q = mvmobj['Q'][:, dims[0] - 1] / np.max(np.abs(mvmobj['Q'][:, dims[0] - 1]))
-        y_q = mvmobj['Q'][:, dims[1] - 1] / np.max(np.abs(mvmobj['Q'][:, dims[1] - 1]))
+        x_q = mvm_obj['Q'][:, dims[0] - 1] / np.max(np.abs(mvm_obj['Q'][:, dims[0] - 1]))
+        y_q = mvm_obj['Q'][:, dims[1] - 1] / np.max(np.abs(mvm_obj['Q'][:, dims[1] - 1]))
 
         fig, ax = plt.subplots(figsize=(plotwidth, plotwidth))
         ax.scatter(x_ws, y_ws, color='darkblue', label='X Loadings')
@@ -508,13 +508,13 @@ def loadings_map(mvm_obj: dict, dims: List[int], *, plotwidth: int = 8, addtitle
         lv_prefix = 'PC #'
         lv_labels = [lv_prefix + str(a + 1) for a in range(A)]
 
-        if 'varidX' in mvmobj:
-            XVar = mvmobj['varidX']
+        if 'varidX' in mvm_obj:
+            XVar = mvm_obj['varidX']
         else:
             XVar = ['XVar #' + str(n + 1) for n in range(num_varX)]
 
-        x_p = mvmobj['P'][:, dims[0] - 1]
-        y_p = mvmobj['P'][:, dims[1] - 1]
+        x_p = mvm_obj['P'][:, dims[0] - 1]
+        y_p = mvm_obj['P'][:, dims[1] - 1]
 
         fig, ax = plt.subplots(figsize=(plotwidth, plotwidth))
         ax.scatter(x_p, y_p, color='darkblue', label='X Loadings')
@@ -552,42 +552,42 @@ def r2pv(mvm_obj: Dict, *, plotwidth: int = 8, plotheight: int = 6, addtitle: st
         None
     """
 
-    A = mvmobj['T'].shape[1]
+    A = mvm_obj['T'].shape[1]
     yaxlbl = 'X'
-    if (mvmobj['type'] == 'lpls') or (mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls'):
-        if ((mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls')) and not(isinstance(material, bool)):
-            mvmobj['r2xpv'] = mvmobj['r2xpvi'][mvmobj['materials'].index(material)]
-            mvmobj['varidX'] = mvmobj['varidXi'][mvmobj['materials'].index(material)]
-        elif (mvmobj['type'] == 'tpls') and zspace:
-            mvmobj['r2xpv'] = mvmobj['r2zpv']
-            mvmobj['varidX'] = mvmobj['varidZ']
+    if (mvm_obj['type'] == 'lpls') or (mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls'):
+        if ((mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls')) and not(isinstance(material, bool)):
+            mvm_obj['r2xpv'] = mvm_obj['r2xpvi'][mvm_obj['materials'].index(material)]
+            mvm_obj['varidX'] = mvm_obj['varidXi'][mvm_obj['materials'].index(material)]
+        elif (mvm_obj['type'] == 'tpls') and zspace:
+            mvm_obj['r2xpv'] = mvm_obj['r2zpv']
+            mvm_obj['varidX'] = mvm_obj['varidZ']
             yaxlbl = 'Z'
     else:
-        num_varX = mvmobj['P'].shape[0]
+        num_varX = mvm_obj['P'].shape[0]
 
-    is_pls = 'Q' in mvmobj
+    is_pls = 'Q' in mvm_obj
     lv_prefix = 'LV #' if is_pls else 'PC #'
         
     lv_labels = [lv_prefix + str(a + 1) for a in range(A)]
 
-    if 'varidX' in mvmobj:
-        XVar = mvmobj['varidX']
+    if 'varidX' in mvm_obj:
+        XVar = mvm_obj['varidX']
     else:
         XVar = ['XVar #' + str(n + 1) for n in range(num_varX)]
 
     r2pvX_dict = {'XVar': XVar}
     for i in range(A):
-        r2pvX_dict.update({lv_labels[i]: mvmobj['r2xpv'][:, i].tolist()})
+        r2pvX_dict.update({lv_labels[i]: mvm_obj['r2xpv'][:, i].tolist()})
 
     if is_pls:
-        num_varY = mvmobj['Q'].shape[0]
-        if 'varidY' in mvmobj:
-            YVar = mvmobj['varidY']
+        num_varY = mvm_obj['Q'].shape[0]
+        if 'varidY' in mvm_obj:
+            YVar = mvm_obj['varidY']
         else:
             YVar = ['YVar #' + str(n + 1) for n in range(num_varY)]
         r2pvY_dict = {'YVar': YVar}
         for i in range(A):
-            r2pvY_dict.update({lv_labels[i]: mvmobj['r2ypv'][:, i].tolist()})
+            r2pvY_dict.update({lv_labels[i]: mvm_obj['r2ypv'][:, i].tolist()})
     
     colormap = plt.cm.rainbow
     colors = colormap(np.linspace(0, 1, A))
@@ -639,27 +639,27 @@ def r2(mvm_obj: Dict, *, plotwidth: int = 8, plotheight: int = 6, addtitle: str 
         None
     """
 
-    mvmobj = mvm_obj.copy()
-    A = mvmobj['T'].shape[1]
+    mvm_obj = mvm_obj.copy()
+    A = mvm_obj['T'].shape[1]
     yaxlbl = 'X'
-    if (mvmobj['type'] == 'lpls') or (mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls'):
-        if ((mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls')) and not(isinstance(material, bool)):
-            mvmobj['r2xpv'] = mvmobj['r2xpvi'][mvmobj['materials'].index(material)]
-            mvmobj['varidX'] = mvmobj['varidXi'][mvmobj['materials'].index(material)]
-        elif (mvmobj['type'] == 'tpls') and zspace:
-            mvmobj['r2xpv'] = mvmobj['r2zpv']
-            mvmobj['varidX'] = mvmobj['varidZ']
+    if (mvm_obj['type'] == 'lpls') or (mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls'):
+        if ((mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls')) and not(isinstance(material, bool)):
+            mvm_obj['r2xpv'] = mvm_obj['r2xpvi'][mvm_obj['materials'].index(material)]
+            mvm_obj['varidX'] = mvm_obj['varidXi'][mvm_obj['materials'].index(material)]
+        elif (mvm_obj['type'] == 'tpls') and zspace:
+            mvm_obj['r2xpv'] = mvm_obj['r2zpv']
+            mvm_obj['varidX'] = mvm_obj['varidZ']
             yaxlbl = 'Z'
     else:
-        num_varX = mvmobj['P'].shape[0]
+        num_varX = mvm_obj['P'].shape[0]
 
-    is_pls = 'Q' in mvmobj
+    is_pls = 'Q' in mvm_obj
     lv_prefix = 'LV #' if is_pls else 'PC #'
         
     lv_labels = [lv_prefix + str(a + 1) for a in range(A)]
 
-    if 'varidX' in mvmobj:
-        XVar = mvmobj['varidX']
+    if 'varidX' in mvm_obj:
+        XVar = mvm_obj['varidX']
     else:
         XVar = ['XVar #' + str(n + 1) for n in range(num_varX)]
 
@@ -667,19 +667,19 @@ def r2(mvm_obj: Dict, *, plotwidth: int = 8, plotheight: int = 6, addtitle: str 
     r2X_dict = {}
     for i in range(A):
         # Update the dictionary with the R2X values for the current component
-        r2X_dict[lv_labels[i]] = mvmobj['r2x'][i].tolist()
+        r2X_dict[lv_labels[i]] = mvm_obj['r2x'][i].tolist()
 
     if is_pls:
-        num_varY = mvmobj['Q'].shape[0]
-        if 'varidY' in mvmobj:
-            YVar = mvmobj['varidY']
+        num_varY = mvm_obj['Q'].shape[0]
+        if 'varidY' in mvm_obj:
+            YVar = mvm_obj['varidY']
         else:
             YVar = ['YVar #' + str(n + 1) for n in range(num_varY)]
         # R2Y values across variables for each component
         r2Y_dict = {}
         for i in range(A):
             # Update the dictionary with the R2Y values for the current component
-            r2Y_dict[lv_labels[i]] = mvmobj['r2y'][i].tolist()
+            r2Y_dict[lv_labels[i]] = mvm_obj['r2y'][i].tolist()
     
     colormap = plt.cm.rainbow
     colors = colormap(np.linspace(0, 1, A))
@@ -725,21 +725,21 @@ def r2c(mvm_obj: Dict, *, plotwidth: int = 8, plotheight: int = 6, addtitle: str
         None
     """
 
-    mvmobj = mvm_obj.copy()
-    A = mvmobj['T'].shape[1]
+    mvm_obj = mvm_obj.copy()
+    A = mvm_obj['T'].shape[1]
     yaxlbl = 'X'
-    if (mvmobj['type'] == 'lpls') or (mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls'):
-        if ((mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls')) and not(isinstance(material, bool)):
-            mvmobj['r2xpv'] = mvmobj['r2xpvi'][mvmobj['materials'].index(material)]
-            mvmobj['varidX'] = mvmobj['varidXi'][mvmobj['materials'].index(material)]
-        elif (mvmobj['type'] == 'tpls') and zspace:
-            mvmobj['r2xpv'] = mvmobj['r2zpv']
-            mvmobj['varidX'] = mvmobj['varidZ']
+    if (mvm_obj['type'] == 'lpls') or (mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls'):
+        if ((mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls')) and not(isinstance(material, bool)):
+            mvm_obj['r2xpv'] = mvm_obj['r2xpvi'][mvm_obj['materials'].index(material)]
+            mvm_obj['varidX'] = mvm_obj['varidXi'][mvm_obj['materials'].index(material)]
+        elif (mvm_obj['type'] == 'tpls') and zspace:
+            mvm_obj['r2xpv'] = mvm_obj['r2zpv']
+            mvm_obj['varidX'] = mvm_obj['varidZ']
             yaxlbl = 'Z'
     else:
-        num_varX = mvmobj['P'].shape[0]
+        num_varX = mvm_obj['P'].shape[0]
 
-    is_pls = 'Q' in mvmobj
+    is_pls = 'Q' in mvm_obj
     lv_prefix = 'LV #' if is_pls else 'PC #'
         
     lv_labels = [lv_prefix + str(a + 1) for a in range(A)]
@@ -748,19 +748,19 @@ def r2c(mvm_obj: Dict, *, plotwidth: int = 8, plotheight: int = 6, addtitle: str
     r2X_dict = {}
     for i in range(A):
         # Update the dictionary with the R2X values for the current component
-        r2X_dict[lv_labels[i]] = mvmobj['r2x'][i].tolist()
+        r2X_dict[lv_labels[i]] = mvm_obj['r2x'][i].tolist()
 
     if is_pls:
-        num_varY = mvmobj['Q'].shape[0]
-        if 'varidY' in mvmobj:
-            YVar = mvmobj['varidY']
+        num_varY = mvm_obj['Q'].shape[0]
+        if 'varidY' in mvm_obj:
+            YVar = mvm_obj['varidY']
         else:
             YVar = ['YVar #' + str(n + 1) for n in range(num_varY)]
         # R2Y values across variables for each component
         r2Y_dict = {}
         for i in range(A):
             # Update the dictionary with the R2Y values for the current component
-            r2Y_dict[lv_labels[i]] = mvmobj['r2y'][i].tolist()
+            r2Y_dict[lv_labels[i]] = mvm_obj['r2y'][i].tolist()
 
     # Convert r2X_dict to lists for plotting
     components = list(r2X_dict.keys())
@@ -803,33 +803,33 @@ def vip(mvm_obj: Dict, *, plotwidth: int = 10, material: Union[bool, str] = Fals
         None
     """
 
-    mvmobj = mvm_obj.copy()
-    if 'Q' in mvmobj:  
-        if (mvmobj['type'] == 'lpls') or (mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls'):
-            if (mvmobj['type'] == 'lpls'):
-                mvmobj['Ws'] = mvmobj['Ss']
+    mvm_obj = mvm_obj.copy()
+    if 'Q' in mvm_obj:  
+        if (mvm_obj['type'] == 'lpls') or (mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls'):
+            if (mvm_obj['type'] == 'lpls'):
+                mvm_obj['Ws'] = mvm_obj['Ss']
             if isinstance(material, bool) and not(zspace):
-                mvmobj['Ws'] = mvmobj['Ss']
-            if ((mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls')) and not(isinstance(material, bool)):
-                mvmobj['Ws'] = mvmobj['Ssi'][mvmobj['materials'].index(material)]
-                mvmobj['varidX'] = mvmobj['varidXi'][mvmobj['materials'].index(material)]
-            elif (mvmobj['type'] == 'tpls') and zspace:
-                mvmobj['varidX'] = mvmobj['varidZ']
+                mvm_obj['Ws'] = mvm_obj['Ss']
+            if ((mvm_obj['type'] == 'jrpls') or (mvm_obj['type'] == 'tpls')) and not(isinstance(material, bool)):
+                mvm_obj['Ws'] = mvm_obj['Ssi'][mvm_obj['materials'].index(material)]
+                mvm_obj['varidX'] = mvm_obj['varidXi'][mvm_obj['materials'].index(material)]
+            elif (mvm_obj['type'] == 'tpls') and zspace:
+                mvm_obj['varidX'] = mvm_obj['varidZ']
             
         else:
-            num_varX = mvmobj['P'].shape[0]
+            num_varX = mvm_obj['P'].shape[0]
             # rnd_num = str(int(np.round(1000 * np.random.random_sample())))
             # rnd_num = timestr()
             # output_file("VIP_" + rnd_num + ".html", title='VIP Coefficient', mode='inline') 
                    
-        if 'varidX' in mvmobj:
-            XVar = mvmobj['varidX']
+        if 'varidX' in mvm_obj:
+            XVar = mvm_obj['varidX']
         else:
             XVar = []
             for n in list(np.arange(num_varX) + 1):
                 XVar.append('XVar #' + str(n))               
         
-        vip = np.sum(np.abs(mvmobj['Ws'] * np.tile(mvmobj['r2y'], (mvmobj['Ws'].shape[0], 1))), axis=1)
+        vip = np.sum(np.abs(mvm_obj['Ws'] * np.tile(mvm_obj['r2y'], (mvm_obj['Ws'].shape[0], 1))), axis=1)
         vip = np.reshape(vip, (len(vip), -1))
         sort_indx = np.argsort(-vip, axis=0)
         vip = vip[sort_indx]
