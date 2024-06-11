@@ -15,16 +15,32 @@ import matplotlib.pyplot as plt
 import pyphi as phi
 import pandas as pd
 from datetime import datetime
+from typing import Union, List, Tuple, Dict, Union, Optional
 
 
-def timestr():
-    now=datetime.now()
+def timestr() -> str:
+    """
+    Returns the current date and time as a formatted string.
+
+    Returns:
+        str: Current date and time in 'YYYYMMDDHHMMSS' format.
+    """
+    now = datetime.now()
     return now.strftime("%Y%m%d%H%M%S")
 
-def _create_classid_(df,column,*,nbins=5):
-    '''
-    Internal routine to create a CLASSID dataframe from values in a column
-    '''
+
+def _create_classid_(df: pd.DataFrame, column: str, *, nbins: int = 5) -> pd.DataFrame:
+    """
+    Creates a CLASSID dataframe from values in a specified column by binning the data.
+
+    Args:
+        df (pd.DataFrame): The input dataframe.
+        column (str): The name of the column to bin.
+        nbins (int, optional): The number of bins to use. Default is 5.
+
+    Returns:
+        pd.DataFrame: A dataframe with binned CLASSID.
+    """
     
     hist,bin_edges=np.histogram(df[column].values[np.logical_not(np.isnan(df[column].values))],bins=nbins )
     range_list=[]
@@ -41,8 +57,34 @@ def _create_classid_(df,column,*,nbins=5):
     classid_df.insert(1,column,membership)
     return classid_df
 
-def score_scatter(mvm_obj,xydim,*,CLASSID=False,Xnew=False,rscores=False,material=False,include_model=False,title='',
-                  add_ci=False,add_labels=False,add_legend=False,nbins=False,marker_size=4):
+def score_scatter(mvm_obj: dict, xydim: List[int], *,
+                  CLASSID: bool = False, Xnew: Union[bool, np.ndarray, pd.DataFrame] = False,
+                  rscores: bool = False, material: Union[bool, str] = False,
+                  include_model: bool = False, title: str = '',
+                  add_ci: bool = False, add_labels: bool = False, 
+                  add_legend: bool = False, nbins: Union[bool, int] = False, 
+                  marker_size: int = 4) -> None:
+    """
+    Creates a scatter plot of scores from a PLS/PCA model.
+
+    Args:
+        mvm_obj (dict): The PLS/PCA model object.
+        xydim (List[int]): Dimensions to plot (e.g., [1, 2]).
+        CLASSID (bool, optional): If True, includes class IDs. Default is False.
+        Xnew (Union[bool, np.ndarray, pd.DataFrame], optional): New data to project. Default is False.
+        rscores (bool, optional): If True, plots R-scores. Default is False.
+        material (Union[bool, str], optional): Specifies material if applicable. Default is False.
+        include_model (bool, optional): If True, includes the model data in the plot. Default is False.
+        title (str, optional): Title of the plot. Default is ''.
+        add_ci (bool, optional): If True, adds confidence intervals. Default is False.
+        add_labels (bool, optional): If True, adds labels to points. Default is False.
+        add_legend (bool, optional): If True, adds a legend to the plot. Default is False.
+        nbins (Union[bool, int], optional): Number of bins for class ID creation. Default is False.
+        marker_size (int, optional): Size of the scatter plot markers. Default is 4.
+
+    Returns:
+        None
+    """
     
     if not(isinstance(nbins, bool)):
          if colorby in CLASSID.columns.to_list():
@@ -292,7 +334,23 @@ def score_scatter(mvm_obj,xydim,*,CLASSID=False,Xnew=False,rscores=False,materia
 import matplotlib.pyplot as plt
 import numpy as np
 
-def loadings(mvm_obj, plotwidth=10, xgrid=False, addtitle='', material=False, zspace=False):
+def loadings(mvm_obj: dict, plotwidth: int = 10, xgrid: bool = False, 
+             addtitle: str = '', material: Union[bool, str] = False, 
+             zspace: bool = False) -> None:
+    """
+    Plots the loadings of a PLS/PCA model.
+
+    Args:
+        mvm_obj (dict): The PLS/PCA model object.
+        plotwidth (int, optional): Width of the plot. Default is 10.
+        xgrid (bool, optional): If True, adds grid lines to the x-axis. Default is False.
+        addtitle (str, optional): Additional title for the plot. Default is ''.
+        material (Union[bool, str], optional): Specifies material if applicable. Default is False.
+        zspace (bool, optional): If True, uses Z-space loadings. Default is False.
+
+    Returns:
+        None
+    """
     
     mvmobj = mvm_obj.copy()
     space_lbl = 'X'
@@ -370,7 +428,24 @@ def loadings(mvm_obj, plotwidth=10, xgrid=False, addtitle='', material=False, zs
 
 
 
-def loadings_map(mvm_obj, dims, *, plotwidth=8, addtitle='', material=False, zspace=False, textalpha=0.75):
+def loadings_map(mvm_obj: dict, dims: List[int], *, plotwidth: int = 8, addtitle: str = '', 
+                 material: Union[bool, str] = False, zspace: bool = False, 
+                 textalpha: float = 0.75) -> None:
+    """
+    Plots the loadings map for a PLS/PCA model.
+
+    Args:
+        mvm_obj (dict): The PLS/PCA model object.
+        dims (List[int]): Dimensions to plot (e.g., [1, 2]).
+        plotwidth (int, optional): Width of the plot. Default is 8.
+        addtitle (str, optional): Additional title for the plot. Default is ''.
+        material (Union[bool, str], optional): Specifies material if applicable. Default is False.
+        zspace (bool, optional): If True, uses Z-space loadings. Default is False.
+        textalpha (float, optional): Transparency of the text annotations. Default is 0.75.
+
+    Returns:
+        None
+    """
 
     mvmobj = mvm_obj.copy()
     A = mvmobj['T'].shape[1]
@@ -461,8 +536,22 @@ def loadings_map(mvm_obj, dims, *, plotwidth=8, addtitle='', material=False, zsp
         plt.show()
 
 
-def r2pv(mvm_obj, *, plotwidth=8, plotheight=6, addtitle='', material=False, zspace=False):
-    mvmobj = mvm_obj.copy()
+def r2pv(mvm_obj: Dict, *, plotwidth: int = 8, plotheight: int = 6, addtitle: str = '', material: Union[bool, str] = False, zspace: bool = False) -> None:
+    """
+    Generates a bar plot for R2 Per Variable (R2PV) for the given multivariate model object.
+
+    Args:
+    - mvm_obj (Dict): The multivariate model object.
+    - plotwidth (int, optional): The width of the plot. Defaults to 8.
+    - plotheight (int, optional): The height of the plot. Defaults to 6.
+    - addtitle (str, optional): Additional title for the plot. Defaults to ''.
+    - material (Union[bool, str], optional): Material specification for the plot. Defaults to False.
+    - zspace (bool, optional): Flag to indicate Z-space in the plot. Defaults to False.
+
+    Returns:
+        None
+    """
+
     A = mvmobj['T'].shape[1]
     yaxlbl = 'X'
     if (mvmobj['type'] == 'lpls') or (mvmobj['type'] == 'jrpls') or (mvmobj['type'] == 'tpls'):
@@ -534,8 +623,21 @@ def r2pv(mvm_obj, *, plotwidth=8, plotheight=6, addtitle='', material=False, zsp
 
 
 
-def r2(mvm_obj, *, plotwidth=8, plotheight=6, addtitle='', material=False, zspace=False):
-    # R2 plot
+def r2(mvm_obj: Dict, *, plotwidth: int = 8, plotheight: int = 6, addtitle: str = '', material: Union[bool, str] = False, zspace: bool = False) -> None:
+    """
+    Generates a bar plot for R2 for the given multivariate model object.
+
+    Args:
+    - mvm_obj (Dict): The multivariate model object.
+    - plotwidth (int, optional): The width of the plot. Defaults to 8.
+    - plotheight (int, optional): The height of the plot. Defaults to 6.
+    - addtitle (str, optional): Additional title for the plot. Defaults to ''.
+    - material (Union[bool, str], optional): Material specification for the plot. Defaults to False.
+    - zspace (bool, optional): Flag to indicate Z-space in the plot. Defaults to False.
+
+    Returns:
+        None
+    """
 
     mvmobj = mvm_obj.copy()
     A = mvmobj['T'].shape[1]
@@ -607,8 +709,21 @@ def r2(mvm_obj, *, plotwidth=8, plotheight=6, addtitle='', material=False, zspac
         plt.show()
 
 
-def r2c(mvm_obj, *, plotwidth=8, plotheight=6, addtitle='', material=False, zspace=False):
-    # Cumulative R2 -> needs fixing
+def r2c(mvm_obj: Dict, *, plotwidth: int = 8, plotheight: int = 6, addtitle: str = '', material: Union[bool, str] = False, zspace: bool = False) -> None:
+    """
+    Generates a cumulative R2 bar plot for the given multivariate model object.
+
+    Args:
+    - mvm_obj (Dict): The multivariate model object.
+    - plotwidth (int, optional): The width of the plot. Defaults to 8.
+    - plotheight (int, optional): The height of the plot. Defaults to 6.
+    - addtitle (str, optional): Additional title for the plot. Defaults to ''.
+    - material (Union[bool, str], optional): Material specification for the plot. Defaults to False.
+    - zspace (bool, optional): Flag to indicate Z-space in the plot. Defaults to False.
+
+    Returns:
+        None
+    """
 
     mvmobj = mvm_obj.copy()
     A = mvmobj['T'].shape[1]
@@ -673,7 +788,20 @@ def r2c(mvm_obj, *, plotwidth=8, plotheight=6, addtitle='', material=False, zspa
         ax.set_ylabel('Cumulative R2Y')
         plt.show()
 
-def vip(mvm_obj, *, plotwidth=10, material=False, zspace=False, addtitle=''):
+def vip(mvm_obj: Dict, *, plotwidth: int = 10, material: Union[bool, str] = False, zspace: bool = False, addtitle: str = '') -> None:
+    """
+    Generates a bar plot for Variable Importance in Projection (VIP) for the given multivariate model object.
+
+    Args:
+    - mvm_obj (Dict): The multivariate model object.
+    - plotwidth (int, optional): The width of the plot. Defaults to 10.
+    - material (Union[bool, str], optional): Material specification for the plot. Defaults to False.
+    - zspace (bool, optional): Flag to indicate Z-space in the plot. Defaults to False.
+    - addtitle (str, optional): Additional title for the plot. Defaults to ''.
+
+    Returns:
+        None
+    """
 
     mvmobj = mvm_obj.copy()
     if 'Q' in mvmobj:  
@@ -717,5 +845,3 @@ def vip(mvm_obj, *, plotwidth=10, material=False, zspace=False, addtitle=''):
         plt.title('VIP ' + addtitle)
         plt.tight_layout()
         plt.show()
-    return
-
